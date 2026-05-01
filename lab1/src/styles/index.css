@@ -41,7 +41,7 @@ body {
 .app {
   height: 100%;
   display: grid;
-  grid-template-rows: var(--toolbar-h) 1fr;
+  grid-template-rows: var(--toolbar-h) 1fr var(--statusbar-h);
   background: var(--bg-0);
 }
 
@@ -128,4 +128,32 @@ body {
   background: #fff;
   box-shadow: 0 0 0 1px var(--border-strong), 0 8px 24px rgba(0, 0, 0, 0.4);
   image-rendering: pixelated;
+}
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 14px;
+  background: var(--bg-1);
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+.statusbar__item {
+  white-space: nowrap;
+}
+
+.statusbar__item--muted {
+  font-style: italic;
+}
+
+.statusbar__item--error {
+  color: var(--danger);
+}
+
+.statusbar__sep {
+  color: var(--border-strong);
 }
