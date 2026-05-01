@@ -1,10 +1,14 @@
 import { useRef } from 'react';
+import { SaveMenu } from './SaveMenu';
+import type { SaveFormat } from '../image/types';
 
 interface ToolbarProps {
   onFile: (file: File) => void;
+  onSave: (format: SaveFormat) => void;
+  canSave: boolean;
 }
 
-export function Toolbar({ onFile }: ToolbarProps) {
+export function Toolbar({ onFile, onSave, canSave }: ToolbarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => inputRef.current?.click();
@@ -29,6 +33,7 @@ export function Toolbar({ onFile }: ToolbarProps) {
         <button type="button" className="btn" onClick={handleClick}>
           Загрузить…
         </button>
+        <SaveMenu disabled={!canSave} onPick={onSave} />
       </div>
     </header>
   );

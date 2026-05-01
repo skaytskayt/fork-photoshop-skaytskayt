@@ -3,7 +3,8 @@ import { Toolbar } from './components/Toolbar';
 import { CanvasView } from './components/CanvasView';
 import { StatusBar } from './components/StatusBar';
 import { loadImageFile } from './image/load';
-import type { ImageDoc } from './image/types';
+import { saveImage } from './image/save';
+import type { ImageDoc, SaveFormat } from './image/types';
 
 export default function App() {
   const [doc, setDoc] = useState<ImageDoc | null>(null);
@@ -19,9 +20,19 @@ export default function App() {
     }
   };
 
+  const handleSave = async (format: SaveFormat) => {
+    if (!doc) return;
+    setError(null);
+    try {
+      await saveImage(doc, format);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   return (
     <div className="app">
-      <Toolbar onFile={handleFile} />
+      <Toolbar onFile={handleFile} onSave={handleSave} canSave={doc !== null} />
       <CanvasView doc={doc} />
       <StatusBar doc={doc} error={error} />
     </div>
