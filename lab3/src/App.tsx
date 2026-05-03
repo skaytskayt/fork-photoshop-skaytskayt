@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Toolbar } from './components/Toolbar';
 import { CanvasView } from './components/CanvasView';
 import { StatusBar } from './components/StatusBar';
@@ -12,10 +12,13 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [levelsOpen, setLevelsOpen] = useState(false);
 
+  const [preview, setPreview] = useState<ImageData | null>(null);
+
   const hasAlpha = useMemo(() => detectAlpha(doc), [doc]);
 
   const handleFile = async (file: File) => {
     setError(null);
+    setPreview(null);
     try {
       const next = await loadImageFile(file);
       setDoc(next);
@@ -34,6 +37,13 @@ export default function App() {
     }
   };
 
+  const handleClose = useCallback(() => {
+    setLevelsOpen(false);
+    setPreview(null);
+  }, []);
+
+  const visiblePixels = preview ?? doc?.pixels ?? null;
+
   return (
     <div className="app">
       <Toolbar
@@ -43,13 +53,14 @@ export default function App() {
         onOpenLevels={() => setLevelsOpen(true)}
         levelsDisabled={doc === null}
       />
-      <CanvasView pixels={doc?.pixels ?? null} />
+      <CanvasView pixels={visiblePixels} />
       <StatusBar doc={doc} error={error} />
       <LevelsDialog
         open={levelsOpen}
         source={doc?.pixels ?? null}
         hasAlpha={hasAlpha}
-        onClose={() => setLevelsOpen(false)}
+        onClose={handleClose}
+        onPreview={setPreview}
       />
     </div>
   );

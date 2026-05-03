@@ -5,9 +5,12 @@ import { CHANNEL_OPTIONS, type ChannelKey } from './channelKeys';
 import { InputLevels } from './InputLevels';
 import type { LevelsParams } from './levelsState';
 import {
+  buildChannelLuts,
   defaultByChannel,
+  hasAnyChange,
   type LevelsByChannel,
 } from './buildChannelLuts';
+import { applyLuts } from './applyLevels';
 
 interface LevelsDialogProps {
   open: boolean;
@@ -15,15 +18,24 @@ interface LevelsDialogProps {
   source: ImageData | null;
   hasAlpha: boolean;
   onClose: () => void;
+
+  onPreview: (preview: ImageData | null) => void;
 }
 
-export function LevelsDialog({ open, source, hasAlpha, onClose }: LevelsDialogProps) {
+export function LevelsDialog({
+  open,
+  source,
+  hasAlpha,
+  onClose,
+  onPreview,
+}: LevelsDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const [channel, setChannel] = useState<ChannelKey>('master');
   const [scale, setScale] = useState<HistogramScale>('linear');
 
   const [byChannel, setByChannel] = useState<LevelsByChannel>(defaultByChannel);
+  const [previewEnabled, setPreviewEnabled] = useState(true);
 
   const histograms: HistogramSet | null = useMemo(
     () => (source ? computeHistograms(source) : null),
@@ -38,6 +50,7 @@ export function LevelsDialog({ open, source, hasAlpha, onClose }: LevelsDialogPr
 
       setChannel('master');
       setByChannel(defaultByChannel());
+      setPreviewEnabled(true);
     } else if (!open && dialog.open) {
       dialog.close();
     }
@@ -59,6 +72,23 @@ export function LevelsDialog({ open, source, hasAlpha, onClose }: LevelsDialogPr
   const params = byChannel[channel];
   const setParams = (next: LevelsParams) =>
     setByChannel((prev) => ({ ...prev, [channel]: next }));
+
+  useEffect(() => {
+    if (!open) {
+      onPreview(null);
+      return;
+    }
+    if (!source || !previewEnabled) {
+      onPreview(null);
+      return;
+    }
+    if (!hasAnyChange(byChannel)) {
+      onPreview(null);
+      return;
+    }
+    const luts = buildChannelLuts(byChannel);
+    onPreview(applyLuts(source, luts));
+  }, [open, source, previewEnabled, byChannel, onPreview]);
 
   return (
     <dialog ref={dialogRef} className="levels">
@@ -117,6 +147,15 @@ export function LevelsDialog({ open, source, hasAlpha, onClose }: LevelsDialogPr
           />
           <InputLevels params={params} onChange={setParams} />
         </div>
+
+        <label className="levels__preview">
+          <input
+            type="checkbox"
+            checked={previewEnabled}
+            onChange={(e) => setPreviewEnabled(e.target.checked)}
+          />
+          Предпросмотр
+        </label>
       </form>
     </dialog>
   );
