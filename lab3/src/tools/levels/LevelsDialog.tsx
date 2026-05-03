@@ -3,7 +3,11 @@ import { computeHistograms, selectHistogram, type HistogramSet } from './histogr
 import { HistogramView, type HistogramScale } from './HistogramView';
 import { CHANNEL_OPTIONS, type ChannelKey } from './channelKeys';
 import { InputLevels } from './InputLevels';
-import { DEFAULT_PARAMS, type LevelsParams } from './levelsState';
+import type { LevelsParams } from './levelsState';
+import {
+  defaultByChannel,
+  type LevelsByChannel,
+} from './buildChannelLuts';
 
 interface LevelsDialogProps {
   open: boolean;
@@ -18,7 +22,8 @@ export function LevelsDialog({ open, source, hasAlpha, onClose }: LevelsDialogPr
 
   const [channel, setChannel] = useState<ChannelKey>('master');
   const [scale, setScale] = useState<HistogramScale>('linear');
-  const [params, setParams] = useState<LevelsParams>(DEFAULT_PARAMS);
+
+  const [byChannel, setByChannel] = useState<LevelsByChannel>(defaultByChannel);
 
   const histograms: HistogramSet | null = useMemo(
     () => (source ? computeHistograms(source) : null),
@@ -32,7 +37,7 @@ export function LevelsDialog({ open, source, hasAlpha, onClose }: LevelsDialogPr
       dialog.showModal();
 
       setChannel('master');
-      setParams(DEFAULT_PARAMS);
+      setByChannel(defaultByChannel());
     } else if (!open && dialog.open) {
       dialog.close();
     }
@@ -51,6 +56,9 @@ export function LevelsDialog({ open, source, hasAlpha, onClose }: LevelsDialogPr
     : CHANNEL_OPTIONS.filter((o) => o.key !== 'alpha');
 
   const bins = histograms ? selectHistogram(histograms, channel) : null;
+  const params = byChannel[channel];
+  const setParams = (next: LevelsParams) =>
+    setByChannel((prev) => ({ ...prev, [channel]: next }));
 
   return (
     <dialog ref={dialogRef} className="levels">

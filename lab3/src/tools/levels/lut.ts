@@ -46,3 +46,9 @@ export function buildLut(params: LevelsParams): Lut {
 export function isIdentity(params: LevelsParams): boolean {
   return params.black === 0 && params.white === 255 && params.gamma === 1.0;
 }
+
+export function applyComposed(a: Lut, b: Lut): Lut {
+  const out = new Uint8ClampedArray(256);
+  for (let v = 0; v < 256; v++) out[v] = b[a[v]];
+  return out;
+}
