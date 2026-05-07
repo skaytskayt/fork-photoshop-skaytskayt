@@ -1,4 +1,4 @@
-name: Deploy lab1 to GitHub Pages
+name: Deploy labs to GitHub Pages
 
 on:
   push:
@@ -17,9 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: lab1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,19 +25,48 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: lab1/package-lock.json
 
-      - name: Install deps
-        run: npm ci
+      - name: Install lab1
+        working-directory: lab1
+        run: npm install
 
-      - name: Build
+      - name: Build lab1
+        working-directory: lab1
         run: npm run build
+
+      - name: Install lab2
+        working-directory: lab2
+        run: npm install
+
+      - name: Build lab2
+        working-directory: lab2
+        run: npm run build
+
+      - name: Compose site
+        run: |
+          mkdir -p site/lab1 site/lab2
+          cp -R lab1/dist/. site/lab1/
+          cp -R lab2/dist/. site/lab2/
+          cat > site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="ru">
+            <head>
+              <meta charset="UTF-8" />
+              <title>ТКГ — лабораторные</title>
+            </head>
+            <body>
+              <ul>
+                <li><a href="./lab1/">Лаб. 1 — GrayBit Image Editor</a></li>
+                <li><a href="./lab2/">Лаб. 2 — Цветовые каналы и пипетка</a></li>
+              </ul>
+            </body>
+          </html>
+          HTML
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: lab1/dist
+          path: site
 
   deploy:
     needs: build

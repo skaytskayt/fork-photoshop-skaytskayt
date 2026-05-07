@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const repoName = 'Computer-graphics-technologies';
+const repoName = 'photoshop-skaytskayt';
+const labPath = 'lab2';
 
 export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: command === 'build' ? `/${repoName}/` : './',
+  base: command === 'build' ? `/${repoName}/${labPath}/` : './',
 }));
