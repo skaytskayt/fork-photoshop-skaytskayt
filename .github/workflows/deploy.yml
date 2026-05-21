@@ -58,13 +58,22 @@ jobs:
         working-directory: lab4
         run: npm run build
 
+      - name: Install lab5
+        working-directory: lab5
+        run: npm install
+
+      - name: Build lab5
+        working-directory: lab5
+        run: npm run build
+
       - name: Compose site
         run: |
-          mkdir -p site/lab1 site/lab2 site/lab3 site/lab4
+          mkdir -p site/lab1 site/lab2 site/lab3 site/lab4 site/lab5
           cp -R lab1/dist/. site/lab1/
           cp -R lab2/dist/. site/lab2/
           cp -R lab3/dist/. site/lab3/
           cp -R lab4/dist/. site/lab4/
+          cp -R lab5/dist/. site/lab5/
           cat > site/index.html <<'HTML'
           <!doctype html>
           <html lang="ru">
@@ -78,6 +87,7 @@ jobs:
                 <li><a href="./lab2/">Лаб. 2 — Цветовые каналы и пипетка</a></li>
                 <li><a href="./lab3/">Лаб. 3 — Гистограмма и «Уровни»</a></li>
                 <li><a href="./lab4/">Лаб. 4 — Масштабирование</a></li>
+                <li><a href="./lab5/">Лаб. 5 — Фильтрация ядром свёртки</a></li>
               </ul>
             </body>
           </html>
